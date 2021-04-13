@@ -45,6 +45,8 @@ namespace RobotRecovery
 
     class BotMazeState
     {
+        public string FromStateKey { get; set; }
+
         public Move FromMove { get; set; }
         
         public int FromLength {get; set;}
@@ -57,18 +59,24 @@ namespace RobotRecovery
 
         public bool Reached {get; set;}
         
-        public String Key { get; set;}
+        public string Key { get; set;}
         
         public int MaxBotDistance { get; set; }
 
         public BotMazeState(
-            List<Room> p_botInRooms, 
+            List<Room> p_botInRooms,
+            string p_fromStateKey,
             Move p_fromMove,
             int p_fromLength, 
             MazeShortestPathMap p_shortPathMap)
         {
+            FromStateKey = p_fromStateKey;
             FromMove = p_fromMove;
             FromLength = p_fromLength;
+            BestToLength = Maze.Max_Distance;
+            BestToMove = Move.None;
+            Reached = false;
+
             BotInRooms = p_botInRooms;
             BotInRooms.Sort(Room.CompareByYX);
             foreach (var room in BotInRooms)
@@ -115,7 +123,7 @@ namespace RobotRecovery
                 }
             }
 
-            return new BotMazeState(nextBotInRooms, p_move, this.FromLength+1, p_shortPathMap);
+            return new BotMazeState(nextBotInRooms, Key, p_move, this.FromLength+1, p_shortPathMap);
         }
 
 
