@@ -63,6 +63,7 @@ namespace RobotRecovery
                   
             if (p_state.IsComplete(Cap, p_fromStart))
             {
+                ProcessReached(p_state);
                 return;
             }
             for (int i=0; i< p_state.BotInRooms.Count; i++)
