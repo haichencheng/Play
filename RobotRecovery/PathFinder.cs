@@ -57,11 +57,11 @@ namespace RobotRecovery
         }
 
 
-        private void FollowBots(BotMazeState p_state, int p_leg, int p_depth)
+        private void FollowBots(BotMazeState p_state, int p_leg, int p_fromStart)
         {
             ExploredNodeCount++;
                   
-            if (CheckComplete(p_state))
+            if (CheckComplete(p_state, p_fromStart))
             {
                 return;
             }
@@ -69,16 +69,16 @@ namespace RobotRecovery
             {
                 var botInRoom = p_state.BotInRooms[i];
                 int maxMoveCount = botInRoom.DistanceToEntrance < p_leg ? botInRoom.DistanceToEntrance : p_leg;
-                BotMazeState afterState = FollowBotShortPath(botInRoom, maxMoveCount, p_state);
-                if (!CheckComplete(afterState))
+                BotMazeState afterState = FollowBotShortPath(botInRoom, maxMoveCount, p_state, p_fromStart);
+                if (!CheckComplete(afterState, p_fromStart))
                 {
-                    if (ExploredNodeCount % 10000 == 0)
+                    //if (ExploredNodeCount % 10000 == 0)
                     {
-                        Console.WriteLine($"\n{DateTime.Now} leg {p_leg} Cap {Cap} from {p_state} to {afterState}");
+                        Console.WriteLine($"\n{DateTime.Now} {ExploredNodeCount} leg {p_leg} fromStart {p_fromStart} Cap {Cap} from [{p_state}] to [{afterState}]");
                     }
 
                     // Depth first recursion
-                    FollowBots(afterState, p_leg, p_depth + 1);
+                    FollowBots(afterState, p_leg, p_fromStart + maxMoveCount);
                 }
             }
         }
@@ -105,16 +105,15 @@ namespace RobotRecovery
             return state;
         }
 
-        bool CheckComplete(BotMazeState p_state)
+        bool CheckComplete(BotMazeState p_state, int p_fromStart)
         {
-            if (!p_state.IsComplete(Cap))
+            if (!p_state.IsComplete(Cap, p_fromStart))
             {
                 return false;
             }
             
             if (p_state.Reached)
             {
-
                 var lastUpdated = BackwardUpdate(p_state);
                 if (lastUpdated.Key != Start.Key)
                 {
@@ -140,7 +139,7 @@ namespace RobotRecovery
                 var pathToEntrance = ShortPathMap.GetPathToEntrance(lastBotInRoom);
                 BestPath.Moves.AddRange(pathToEntrance.Moves);
 
-                Console.WriteLine($"\n{DateTime.Now} Step {ExploredNodeCount}, {BestPath.Length}");
+                Console.WriteLine($"\n{DateTime.Now} Step {ExploredNodeCount}, BestPath Len {BestPath.Length}");
                 Console.WriteLine($"{BestPath}\n");
 
                 using (StreamWriter sw = new StreamWriter("ShortPaths.txt", true))
@@ -169,7 +168,7 @@ namespace RobotRecovery
         }
 
 
-        private BotMazeState FollowBotShortPath(Room p_botInRoom, int p_maxMoveCount, BotMazeState p_state)
+        private BotMazeState FollowBotShortPath(Room p_botInRoom, int p_maxMoveCount, BotMazeState p_state, int p_fromStart)
         {
             Debug.Assert(p_state.BotInRooms.Count > 1);
             var botPath = ShortPathMap.GetPathToEntrance(p_botInRoom);
@@ -181,7 +180,7 @@ namespace RobotRecovery
                 var stateAfterMove = state.MoveBy(tryMove, ShortPathMap);
                 stateAfterMove = RecordState(stateAfterMove);
 
-                if (stateAfterMove.IsComplete(Cap))
+                if (stateAfterMove.IsComplete(Cap, p_fromStart))
                 {
                     return stateAfterMove;
                 }

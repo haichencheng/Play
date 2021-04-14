@@ -63,6 +63,11 @@ namespace RobotRecovery
         
         public int MaxBotDistance { get; set; }
 
+        public override string ToString()
+        {
+            return $"{Key} From:{FromLength},Reached={Reached},BestToLength={BestToLength}";
+        }
+
         public BotMazeState(
             List<Room> p_botInRooms,
             string p_fromStateKey,
@@ -127,14 +132,19 @@ namespace RobotRecovery
         }
 
 
-        public bool IsComplete(int p_moveCap)
+        public bool IsComplete(int p_moveCap, int p_fromStart)
         {
             if (BotInRooms.Count <= 1)
             {
                 return true;
             }
 
-            if (p_moveCap <= FromLength + MaxBotDistance)
+            if (FromLength + MaxBotDistance >= p_moveCap)
+            {
+                return true;
+            }
+
+            if (p_fromStart + MaxBotDistance >= p_moveCap)
             {
                 return true;
             }
