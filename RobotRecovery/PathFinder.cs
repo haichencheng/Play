@@ -61,7 +61,7 @@ namespace RobotRecovery
         {
             ExploredNodeCount++;
                   
-            if (CheckComplete(p_state, p_fromStart))
+            if (p_state.IsComplete(Cap, p_fromStart))
             {
                 return;
             }
@@ -70,7 +70,7 @@ namespace RobotRecovery
                 var botInRoom = p_state.BotInRooms[i];
                 int maxMoveCount = botInRoom.DistanceToEntrance < p_leg ? botInRoom.DistanceToEntrance : p_leg;
                 BotMazeState afterState = FollowBotShortPath(botInRoom, maxMoveCount, p_state, p_fromStart);
-                if (!CheckComplete(afterState, p_fromStart))
+                if (!afterState.IsComplete(Cap, p_fromStart))
                 {
                     //if (ExploredNodeCount % 10000 == 0)
                     {
@@ -84,8 +84,13 @@ namespace RobotRecovery
         }
 
 
-        BotMazeState BackwardUpdate(BotMazeState p_state)
+        void ProcessReached(BotMazeState p_state)
         {
+            if (!p_state.Reached)
+            {
+                return;
+            }
+
             var state = p_state;
             while (state.FromLength > 0)
             {
@@ -102,65 +107,54 @@ namespace RobotRecovery
                 state = fromState;
             }
 
-            return state;
+            if (state.Key != Start.Key)
+            {
+                return;
+            }
+
+            if (null != BestPath
+                && p_state.BestToLength + p_state.FromLength >= BestPath.Length)
+            {
+                return;
+            }
+
+            BestPath = new Path();
+            while (state.BotInRooms.Count > 1)
+            {
+                BestPath.Moves.Add(state.BestToMove);
+                var toState = state.MoveBy(state.BestToMove, ShortPathMap);
+                state = KeyToStateMap[toState.Key];
+            }
+
+            var lastBotInRoom = state.BotInRooms[0];
+            var pathToEntrance = ShortPathMap.GetPathToEntrance(lastBotInRoom);
+            BestPath.Moves.AddRange(pathToEntrance.Moves);
+
+            Console.WriteLine($"\n{DateTime.Now} Step {ExploredNodeCount}, BestPath Len {BestPath.Length}");
+            Console.WriteLine($"{BestPath}\n");
+
+            using (StreamWriter sw = new StreamWriter("ShortPaths.txt", true))
+            {
+                sw.WriteLine($"{DateTime.Now} Step {ExploredNodeCount}, {BestPath.Length}");
+                sw.WriteLine($"{BestPath}");
+                sw.WriteLine();
+            }
         }
 
-        bool CheckComplete(BotMazeState p_state, int p_fromStart)
-        {
-            if (!p_state.IsComplete(Cap, p_fromStart))
-            {
-                return false;
-            }
-            
-            if (p_state.Reached)
-            {
-                var lastUpdated = BackwardUpdate(p_state);
-                if (lastUpdated.Key != Start.Key)
-                {
-                    return true;
-                }
-
-                if (null != BestPath
-                    && p_state.BestToLength + p_state.FromLength >= BestPath.Length)
-                {
-                    return true;
-                }
-
-                BestPath = new Path();
-                var state = lastUpdated;
-                while (state.BotInRooms.Count > 1)
-                {
-                    BestPath.Moves.Add(state.BestToMove);
-                    var toState = state.MoveBy(state.BestToMove, ShortPathMap);
-                    state = KeyToStateMap[toState.Key];
-                }
-
-                var lastBotInRoom = state.BotInRooms[0];
-                var pathToEntrance = ShortPathMap.GetPathToEntrance(lastBotInRoom);
-                BestPath.Moves.AddRange(pathToEntrance.Moves);
-
-                Console.WriteLine($"\n{DateTime.Now} Step {ExploredNodeCount}, BestPath Len {BestPath.Length}");
-                Console.WriteLine($"{BestPath}\n");
-
-                using (StreamWriter sw = new StreamWriter("ShortPaths.txt", true))
-                {
-                    sw.WriteLine($"{DateTime.Now} Step {ExploredNodeCount}, {BestPath.Length}");
-                    sw.WriteLine($"{BestPath}");
-                    sw.WriteLine();
-                }
-            }
-            return true;
-        }
 
         BotMazeState RecordState(BotMazeState p_state)
         {
             if (KeyToStateMap.ContainsKey(p_state.Key))
             {
                 var savedState = KeyToStateMap[p_state.Key];
-                if (savedState.FromLength < p_state.FromLength)
+                if (savedState.FromLength > p_state.FromLength)
                 {
-                    return savedState;
+                    savedState.FromLength = p_state.FromLength;
+                    savedState.FromMove = p_state.FromMove;
+                    savedState.FromStateKey = p_state.FromStateKey;
                 }
+                ProcessReached(savedState);
+                return savedState;
             }
 
             KeyToStateMap[p_state.Key] = p_state;
@@ -182,6 +176,7 @@ namespace RobotRecovery
 
                 if (stateAfterMove.IsComplete(Cap, p_fromStart))
                 {
+                    ProcessReached(stateAfterMove);
                     return stateAfterMove;
                 }
                 state = stateAfterMove;
