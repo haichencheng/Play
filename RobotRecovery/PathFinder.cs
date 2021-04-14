@@ -73,9 +73,9 @@ namespace RobotRecovery
                 BotMazeState afterState = FollowBotShortPath(botInRoom, maxMoveCount, p_state, p_fromStart);
                 if (!afterState.IsComplete(Cap, p_fromStart))
                 {
-                    //if (ExploredNodeCount % 10000 == 0)
+                    if (ExploredNodeCount % 1000000 == 0)
                     {
-                        Console.WriteLine($"\n{DateTime.Now} {ExploredNodeCount} leg {p_leg} fromStart {p_fromStart} Cap {Cap} from [{p_state}] to [{afterState}]");
+                        Console.WriteLine($"\n{DateTime.Now} {ExploredNodeCount} states={KeyToStateMap.Count} leg {p_leg} fromStart {p_fromStart} Cap {Cap} from [{p_state}] to [{afterState}]");
                     }
 
                     // Depth first recursion

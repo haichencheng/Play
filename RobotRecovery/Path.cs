@@ -65,7 +65,7 @@ namespace RobotRecovery
 
         public override string ToString()
         {
-            return $"{Key} From:{FromLength},Reached={Reached},BestToLength={BestToLength}";
+            return $"{Key} From:{FromLength}, MaxBotDistance={MaxBotDistance}, Reached={Reached}";
         }
 
         public BotMazeState(
