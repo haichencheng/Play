@@ -134,47 +134,11 @@ namespace SimpleBoard
 
 
 
-        private void AddCells()
-        {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            for (int y = 0; y<3; y++)
-            {
-                for (int x = 0; x<3; x++)
-                {
-                    cells[y, x] = new System.Windows.Forms.PictureBox();
-                    var cell = cells[y, x];
-                    //((System.ComponentModel.ISupportInitialize)(cell)).BeginInit();
-                    this.tableLayoutPanel1.Controls.Add(cell, x, y);
-
-                    cell.Dock = System.Windows.Forms.DockStyle.Fill;
-                    cell.Location = new System.Drawing.Point(24+x*136, 24+y*136);
-                    cell.Name = "pictureBox11";
-                    cell.Size = new System.Drawing.Size(129, 129);
-                    cell.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-                    cell.TabIndex = 0;
-                    cell.TabStop = false;
-                    if (0 == (y+x)%2)
-                    {
-                        cell.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox12.Image")));
-                    }
-                    else
-                    {
-                        cell.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox11.Image")));
-                    }
-
-                    //((System.ComponentModel.ISupportInitialize)(cell)).EndInit();
-                }
-            }
-            cells[1,1].Image = null;
-        }
-
-
 
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.SplitContainer splitContainer2;
 
-        private System.Windows.Forms.PictureBox[,] cells = new System.Windows.Forms.PictureBox[3, 3];
     }
 }
 
