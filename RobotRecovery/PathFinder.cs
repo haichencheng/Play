@@ -75,7 +75,7 @@ namespace RobotRecovery
                 {
                     if (ExploredNodeCount % 1000000 == 0)
                     {
-                        Console.WriteLine($"\n{DateTime.Now} {ExploredNodeCount} states={KeyToStateMap.Count} leg {p_leg} fromStart {p_fromStart} Cap {Cap} from [{p_state}] to [{afterState}]");
+                        Console.WriteLine($"\n{DateTime.Now} {ExploredNodeCount/1000000} M states={KeyToStateMap.Count} leg {p_leg} fromStart {p_fromStart} Cap {Cap} from [{p_state}] to [{afterState}]");
                     }
 
                     // Depth first recursion
@@ -93,6 +93,7 @@ namespace RobotRecovery
             }
 
             var state = p_state;
+            int backCount = 0;
             while (state.FromLength > 0)
             {
                 var fromState = KeyToStateMap[state.FromStateKey];
@@ -106,8 +107,13 @@ namespace RobotRecovery
                 fromState.Reached = true;
 
                 state = fromState;
+                backCount++;
             }
-
+            
+            if (backCount > 0)
+            {
+                Console.WriteLine($"\nBack {backCount} from [{p_state}] to [{state}]");
+            }
             if (state.Key != Start.Key)
             {
                 return;
@@ -150,11 +156,14 @@ namespace RobotRecovery
                 var savedState = KeyToStateMap[p_state.Key];
                 if (savedState.FromLength > p_state.FromLength)
                 {
+                   // Console.WriteLine($"Shorten {p_state.Key} FromLength {savedState.FromLength} to {p_state.FromLength}");
+
                     savedState.FromLength = p_state.FromLength;
                     savedState.FromMove = p_state.FromMove;
                     savedState.FromStateKey = p_state.FromStateKey;
+
+                    ProcessReached(savedState);
                 }
-                ProcessReached(savedState);
                 return savedState;
             }
 

@@ -65,7 +65,7 @@ namespace RobotRecovery
 
         public override string ToString()
         {
-            return $"{Key} From:{FromLength}, MaxBotDistance={MaxBotDistance}, Reached={Reached}";
+            return $"{Key} From:{FromLength}, MaxBotDistance={MaxBotDistance}, BestToLength={BestToLength}";
         }
 
         public BotMazeState(
@@ -83,7 +83,7 @@ namespace RobotRecovery
             Reached = false;
 
             BotInRooms = p_botInRooms;
-            BotInRooms.Sort(Room.CompareByYX);
+            BotInRooms.Sort(Room.CompareByDistanceDesc);
             foreach (var room in BotInRooms)
             {
                 Key += $"{room.GetHashCode():D6}";
