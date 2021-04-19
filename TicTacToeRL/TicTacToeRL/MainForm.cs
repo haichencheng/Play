@@ -7,6 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using MatchBoxCore;
+using TicTacToe;
+using QLearningDemo;
 
 namespace TicTacToeRL
 {
@@ -16,7 +19,59 @@ namespace TicTacToeRL
         {
             InitializeComponent();
             AddCells();
+
+            InitializeGame();
         }
+
+        private void InitializeGame()
+        {
+            InitBoard();
+
+            ConfigureServices(m_ioc);
+        }
+
+        private static void ConfigureServices(MatchBox Ioc)
+        {
+            Ioc.RegisterSingleton<IBoard, OXBoard>();
+            Ioc.Register<ILineService, LineService>();
+            Ioc.Register<IOutputInputService, ConsoleService>();
+            Ioc.Register<IGameScorer, GameScorer>();
+
+            Ioc.RegisterSingleton<IReinforcementLearner, Qlearner>();
+            Ioc.Register<IGame, QGame>();
+            Ioc.Register<IRandomTrainer, QTrainer>();
+            Ioc.Register<IMoveHandler, MoveHandler>();
+            Ioc.Register<IInfallibilityTester, InfallibilityTester>();
+            Ioc.Register<ITrainingScheduler, TrainingScheduler>();
+        }
+
+
+        private void InitBoard()
+        {
+            m_board[1, 1] = 1;
+            m_board[0, 0] = 1;
+            m_board[0, 1] = 2;
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    var cell = cells[y, x];
+                    switch (m_board[y, x])
+                    {
+                        case 0:
+                            cell.Image = null;
+                            break;
+                        case 1:
+                            cell.Image = GetImage(false);
+                            break;
+                        case 2:
+                            cell.Image = GetImage(true);
+                            break;
+                    }
+                }
+            }
+        }
+
         private void AddCells()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
@@ -70,45 +125,35 @@ namespace TicTacToeRL
             cell.Refresh();
         }
 
-        private void InitBoard()
-        {
-            m_board[1, 1] = 1;
-            m_board[0, 0] = 1;
-            m_board[0, 1] = 2;
-            for (int y = 0; y < 3; y++)
-            {
-                for (int x = 0; x < 3; x++)
-                {
-                    var cell = cells[y, x];
-                    switch (m_board[y, x])
-                    {
-                        case 0:
-                            cell.Image = null;
-                            break;
-                        case 1:
-                            cell.Image = GetImage(false);
-                            break;
-                        case 2:
-                            cell.Image = GetImage(true);
-                            break;
-                    }
-                }
-            }
-        }
 
         private System.Drawing.Image GetImage(bool p_isX)
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
 
+            Bitmap image = m_imageO;
             if (p_isX)
             {
-                return ((System.Drawing.Image)(resources.GetObject("pictureX.Image")));
+                image = m_imageX;
             }
-            return ((System.Drawing.Image)(resources.GetObject("pictureO.Image")));
+            return (System.Drawing.Image)image;
         }
 
         System.Windows.Forms.PictureBox[,] cells = new System.Windows.Forms.PictureBox[3, 3];
         int[,] m_board = new int[3, 3];
+        MatchBox m_ioc = new MatchBox();
+        Bitmap m_imageO = new Bitmap("Images/Letter_o.png");
+        Bitmap m_imageX = new Bitmap("Images/Letter_x.png");
+        private void buttonStart_Click(object sender, EventArgs e)
+        {
+            var trainingScheduler = m_ioc.Get<ITrainingScheduler>();
+            try
+            {
+                trainingScheduler.ScheduleTraining().Wait();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
     }
 }
 
