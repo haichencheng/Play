@@ -132,7 +132,7 @@ namespace RobotRecovery
         }
 
 
-        public bool IsComplete(int p_moveCap, int p_fromStart)
+        public bool IsComplete(int p_moveCap)
         {
             if (BotInRooms.Count <= 1)
             {
@@ -140,11 +140,6 @@ namespace RobotRecovery
             }
 
             if (FromLength + MaxBotDistance >= p_moveCap)
-            {
-                return true;
-            }
-
-            if (p_fromStart + MaxBotDistance >= p_moveCap)
             {
                 return true;
             }
