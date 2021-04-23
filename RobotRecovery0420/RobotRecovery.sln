@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31129.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobotRecovery", "RobotRecovery.csproj", "{FCC3234D-C6A6-445A-BB25-4D81E6B1F44F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FCC3234D-C6A6-445A-BB25-4D81E6B1F44F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FCC3234D-C6A6-445A-BB25-4D81E6B1F44F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FCC3234D-C6A6-445A-BB25-4D81E6B1F44F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FCC3234D-C6A6-445A-BB25-4D81E6B1F44F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {68D04D33-4D85-4D84-BE87-AAD98D01ACF6}
+	EndGlobalSection
+EndGlobal
