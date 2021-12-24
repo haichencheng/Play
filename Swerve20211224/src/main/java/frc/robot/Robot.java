@@ -5,8 +5,12 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -83,13 +87,23 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {}
 
+  private int m_testRounds = 0;
+  private ShuffleboardTab m_testTab;
   @Override
   public void testInit() {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
+
+    m_testTab = Shuffleboard.getTab("Test");
+    m_testTab.add("Auto", (CommandBase)m_robotContainer.getAutonomousCommand());
+    m_testTab.add("DriveTrain", m_robotContainer.getDriveTrainSubsystem());
+    m_testTab.add("Test", "Inited");
+    m_testRounds = 0;
   }
 
   /** This function is called periodically during test mode. */
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+    m_testTab.add("TestRounds", m_testRounds++);
+  }
 }
