@@ -46,6 +46,8 @@ public class TrajectoryDriveCommand extends CommandBase {
       .setKinematics(m_subsystem.getKinematics());
     
     m_trajectory = TrajectoryGenerator.generateTrajectory(p_subsystem.getPose(), p_interiorWaypoints, p_end, m_config);
+  
+    this.withName("DriveTo_" + p_end.toString());
   }
 
   // Called when the command is initially scheduled.
