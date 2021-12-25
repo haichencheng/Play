@@ -12,6 +12,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 
+import frc.robot.commands.*;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -60,7 +62,7 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    m_autonomousCommand = DriveCommandFactory.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -95,7 +97,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().cancelAll();
 
     m_testTab = Shuffleboard.getTab("Test");
-    m_testTab.add("Auto", (CommandBase)m_robotContainer.getAutonomousCommand());
+    m_testTab.add("Auto", (CommandBase)DriveCommandFactory.getAutonomousCommand());
     m_testTab.add("DriveTrain", m_robotContainer.getDriveTrainSubsystem());
     m_testTab.add("Test", "Inited");
     m_testRounds = 0;

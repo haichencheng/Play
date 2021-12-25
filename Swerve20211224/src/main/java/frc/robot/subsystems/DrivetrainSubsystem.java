@@ -1,6 +1,7 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.*;
 
 import com.kauailabs.navx.frc.AHRS;
 
@@ -23,7 +24,7 @@ import edu.wpi.first.wpilibj.controller.*;
 import edu.wpi.first.wpilibj.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import static frc.robot.Constants.*;
+
 
 public class DrivetrainSubsystem extends SubsystemBase {
   /**
@@ -57,21 +58,9 @@ public class DrivetrainSubsystem extends SubsystemBase {
    */
   // Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
   public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MaxSpeedMetersPerSecond /
-          Math.hypot(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0);
-
-  private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-          // Front left
-          new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
-          // Front right
-          new Translation2d(DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0),
-          // Back left
-          new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, DRIVETRAIN_WHEELBASE_METERS / 2.0),
-          // Back right
-          new Translation2d(-DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0)
-  );
+          Math.hypot(DriveConstants.kTrackWidth / 2.0, DriveConstants.kWheelBase / 2.0);
 
   private final SwerveDriveOdometry m_odometry;
-  private Pose2d m_pose;
 
   private final AHRS m_navx = new AHRS(SPI.Port.kMXP, (byte) 200); // NavX connected over MXP
 
@@ -82,7 +71,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
   private final SwerveModule m_backRightModule;
 
   private ChassisSpeeds m_chassisSpeeds = new ChassisSpeeds(0.0, 0.0, 0.0);
-  private PIDController m_pidController;
 
   private static DrivetrainSubsystem m_instance = null;
   public static DrivetrainSubsystem getInstance(){
@@ -104,13 +92,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
             // This can either be STANDARD or FAST depending on your gear configuration
             Mk4SwerveModuleHelper.GearRatio.L2,
             // This is the ID of the drive motor
-            FRONT_LEFT_MODULE_DRIVE_MOTOR,
+            DriveConstants.FRONT_LEFT_MODULE_DRIVE_MOTOR,
             // This is the ID of the steer motor
-            FRONT_LEFT_MODULE_STEER_MOTOR,
+            DriveConstants.FRONT_LEFT_MODULE_STEER_MOTOR,
             // This is the ID of the steer encoder
-            FRONT_LEFT_MODULE_STEER_ENCODER,
+            DriveConstants.FRONT_LEFT_MODULE_STEER_ENCODER,
             // This is how much the steer encoder is offset from true zero (In our case, zero is facing straight forward)
-            FRONT_LEFT_MODULE_STEER_OFFSET
+            DriveConstants.FRONT_LEFT_MODULE_STEER_OFFSET
     );
 
     // We will do the same for the other modules
@@ -119,10 +107,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
                     .withSize(2, 4)
                     .withPosition(2, 0),
             Mk4SwerveModuleHelper.GearRatio.L2,
-            FRONT_RIGHT_MODULE_DRIVE_MOTOR,
-            FRONT_RIGHT_MODULE_STEER_MOTOR,
-            FRONT_RIGHT_MODULE_STEER_ENCODER,
-            FRONT_RIGHT_MODULE_STEER_OFFSET
+            DriveConstants.FRONT_RIGHT_MODULE_DRIVE_MOTOR,
+            DriveConstants.FRONT_RIGHT_MODULE_STEER_MOTOR,
+            DriveConstants.FRONT_RIGHT_MODULE_STEER_ENCODER,
+            DriveConstants.FRONT_RIGHT_MODULE_STEER_OFFSET
     );
 
     m_backLeftModule = Mk4SwerveModuleHelper.createFalcon500(
@@ -130,10 +118,10 @@ public class DrivetrainSubsystem extends SubsystemBase {
                     .withSize(2, 4)
                     .withPosition(4, 0),
             Mk4SwerveModuleHelper.GearRatio.L2,
-            BACK_LEFT_MODULE_DRIVE_MOTOR,
-            BACK_LEFT_MODULE_STEER_MOTOR,
-            BACK_LEFT_MODULE_STEER_ENCODER,
-            BACK_LEFT_MODULE_STEER_OFFSET
+            DriveConstants.BACK_LEFT_MODULE_DRIVE_MOTOR,
+            DriveConstants.BACK_LEFT_MODULE_STEER_MOTOR,
+            DriveConstants.BACK_LEFT_MODULE_STEER_ENCODER,
+            DriveConstants.BACK_LEFT_MODULE_STEER_OFFSET
     );
 
     m_backRightModule = Mk4SwerveModuleHelper.createFalcon500(
@@ -141,14 +129,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
                     .withSize(2, 4)
                     .withPosition(6, 0),
             Mk4SwerveModuleHelper.GearRatio.L2,
-            BACK_RIGHT_MODULE_DRIVE_MOTOR,
-            BACK_RIGHT_MODULE_STEER_MOTOR,
-            BACK_RIGHT_MODULE_STEER_ENCODER,
-            BACK_RIGHT_MODULE_STEER_OFFSET
+            DriveConstants.BACK_RIGHT_MODULE_DRIVE_MOTOR,
+            DriveConstants.BACK_RIGHT_MODULE_STEER_MOTOR,
+            DriveConstants.BACK_RIGHT_MODULE_STEER_ENCODER,
+            DriveConstants.BACK_RIGHT_MODULE_STEER_OFFSET
     );
 
-    m_pose = new Pose2d(0, 0, new Rotation2d());
-    m_odometry = new SwerveDriveOdometry(m_kinematics, getGyroscopeRotation(), m_pose);
+    m_odometry = new SwerveDriveOdometry(DriveConstants.kDriveKinematics, getGyroscopeRotation());
   }
 
   /**
@@ -169,32 +156,32 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
   
   public Pose2d getPose(){
-        return m_pose;
+        return m_odometry.getPoseMeters();
+  }
+
+  public void resetOdometry(Pose2d p_pose) {
+    m_odometry.resetPosition(p_pose, getGyroscopeRotation());
   }
 
   public void drive(ChassisSpeeds chassisSpeeds) {
     m_chassisSpeeds = chassisSpeeds;
   }
 
-  public SwerveDriveKinematics getKinematics() {
-          return m_kinematics;
-  }
 
   @Override
   public void periodic() {
-    SwerveModuleState[] states = m_kinematics.toSwerveModuleStates(m_chassisSpeeds);
+    SwerveModuleState[] states = DriveConstants.kDriveKinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.normalizeWheelSpeeds(states, MaxSpeedMetersPerSecond);
-
-    m_pose = m_odometry.update(getGyroscopeRotation(), states[0], states[1], 
-        states[2], states[3]);
-
-    SmartDashboard.putNumber("X Position", m_pose.getTranslation().getX());
-    SmartDashboard.putNumber("Y Position", m_pose.getTranslation().getY());
-    SmartDashboard.putNumber("Rotation", getGyroscopeRotation().getDegrees());
 
     m_frontLeftModule.set(states[0].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[0].angle.getRadians());
     m_frontRightModule.set(states[1].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[1].angle.getRadians());
     m_backLeftModule.set(states[2].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[2].angle.getRadians());
     m_backRightModule.set(states[3].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[3].angle.getRadians());
+ 
+    var pose = m_odometry.update(getGyroscopeRotation(), states[0], states[1], states[2], states[3]);
+
+    SmartDashboard.putNumber("X Position", pose.getTranslation().getX());
+    SmartDashboard.putNumber("Y Position", pose.getTranslation().getY());
+    SmartDashboard.putNumber("Rotation", getGyroscopeRotation().getDegrees());
   }
 }
