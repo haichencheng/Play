@@ -8,10 +8,14 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+
 import java.util.List;
 
 import frc.robot.subsystems.DrivetrainSubsystem;
@@ -31,6 +35,23 @@ public class RobotContainer {
   public RobotContainer() {
 
     m_drivetrainSubsystem = DrivetrainSubsystem.getInstance();
+
+    // Set the scheduler to log Shuffleboard events for command initialize, interrupt, finish
+    CommandScheduler.getInstance()
+     .onCommandInitialize(
+         command ->
+             Shuffleboard.addEventMarker(
+                 "Command initialized", command.getName(), EventImportance.kNormal));
+    CommandScheduler.getInstance()
+        .onCommandInterrupt(
+            command ->
+                Shuffleboard.addEventMarker(
+                    "Command interrupted", command.getName(), EventImportance.kNormal));
+    CommandScheduler.getInstance()
+        .onCommandFinish(
+            command ->
+                Shuffleboard.addEventMarker(
+                    "Command finished", command.getName(), EventImportance.kNormal));
 
     // Configure the button bindings
     configureButtonBindings();
@@ -60,8 +81,44 @@ public class RobotContainer {
           m_drivetrainSubsystem,
           // Pass through these two interior waypoints, making an 's' curve path
           List.of(new Translation2d(.5, .25), new Translation2d(1, -.25)),
-          // End 3 meters straight ahead of where we started, facing forward
+          // End 1.5 meters straight ahead of where we started, facing forward
           new Pose2d(1.5, 0, new Rotation2d(0)));
+    return command;
+  }
+
+  public Command getTranslationCommand(double xDistance, double yDistance)
+  {
+    TrajectoryDriveCommand command = new TrajectoryDriveCommand(
+      m_drivetrainSubsystem,
+      // Pass through these two interior waypoints, making an 's' curve path
+      List.of(
+        new Translation2d(xDistance/4, yDistance/4),
+        new Translation2d(xDistance/2, yDistance/2), 
+        new Translation2d(xDistance*3/4, yDistance*3/4)),
+      new Pose2d(xDistance, yDistance, new Rotation2d(0)));
+    return command;
+  }
+
+  public Command getTurnCommand(double rotateRad)
+  {
+    TrajectoryDriveCommand command = new TrajectoryDriveCommand(
+      m_drivetrainSubsystem,
+      // Pass through these two interior waypoints, making an 's' curve path
+      List.of(),
+      new Pose2d(0, 0, new Rotation2d(rotateRad)));
+    return command;
+  }
+
+  public Command getMoveToCommand(double xDistance, double yDistance, double rotateRad)
+  {
+    TrajectoryDriveCommand command = new TrajectoryDriveCommand(
+      m_drivetrainSubsystem,
+      // Pass through these two interior waypoints, making an 's' curve path
+      List.of(
+        new Translation2d(xDistance/4, yDistance/4),
+        new Translation2d(xDistance/2, yDistance/2), 
+        new Translation2d(xDistance*3/4, yDistance*3/4)),
+      new Pose2d(xDistance, yDistance, new Rotation2d(rotateRad)));
     return command;
   }
 
