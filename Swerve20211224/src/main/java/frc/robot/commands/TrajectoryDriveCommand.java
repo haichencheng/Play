@@ -9,6 +9,7 @@ import frc.robot.subsystems.DrivetrainSubsystem;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.geometry.Translation2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.controller.HolonomicDriveController;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.ProfiledPIDController;
@@ -27,6 +28,7 @@ public class TrajectoryDriveCommand extends CommandBase {
 
   private TrajectoryConfig m_config;
   private Trajectory m_trajectory;
+  private Rotation2d m_endRotation;
   private final HolonomicDriveController m_controller;
 
   private final Timer m_timer = new Timer();
@@ -47,7 +49,7 @@ public class TrajectoryDriveCommand extends CommandBase {
       .setKinematics(DriveConstants.kDriveKinematics);
     
     m_trajectory = TrajectoryGenerator.generateTrajectory(m_subsystem.getPose(), p_interiorWaypoints, p_end, m_config);
-
+    m_endRotation = p_end.getRotation();
     var xController = new PIDController(AutoConstants.kPXController, 0, 0);
     var yController = new PIDController(AutoConstants.kPYController, 0, 0);     
     var thetaController = new ProfiledPIDController(AutoConstants.kPThetaController, 0, 0, AutoConstants.kThetaControllerConstraints);
@@ -69,8 +71,7 @@ public class TrajectoryDriveCommand extends CommandBase {
     double curTime = m_timer.get();
     var desiredState = m_trajectory.sample(curTime);
 
-    var targetChassisSpeeds =
-        m_controller.calculate(m_subsystem.getPose(), desiredState, desiredState.poseMeters.getRotation());
+    var targetChassisSpeeds = m_controller.calculate(m_subsystem.getPose(), desiredState, m_endRotation);
     m_subsystem.drive(targetChassisSpeeds);
   }
 
