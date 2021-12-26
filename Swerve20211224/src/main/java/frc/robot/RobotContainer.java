@@ -3,6 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -13,8 +14,8 @@ import edu.wpi.first.wpilibj2.command.button.Button;
 import edu.wpi.first.wpilibj.shuffleboard.EventImportance;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
+import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 
-import frc.robot.subsystems.DrivetrainSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -71,4 +72,45 @@ public class RobotContainer {
     return m_drivetrainSubsystem;
   }
 
+  public void driveWithJoystick() {
+    // Get the x speed. We are inverting this because Xbox controllers return
+    // negative values when we push forward.
+    final var xSpeed = -modifyAxis(m_controller.getY(GenericHID.Hand.kLeft)) * DrivetrainSubsystem.MaxSpeedMetersPerSecond;
+
+    // Get the y speed or sideways/strafe speed. We are inverting this because
+    // we want a positive value when we pull to the left. Xbox controllers
+    // return positive values when you pull to the right by default.
+    final var ySpeed = -modifyAxis(m_controller.getX(GenericHID.Hand.kLeft)) * DrivetrainSubsystem.MaxSpeedMetersPerSecond;
+
+    // Get the rate of angular rotation. We are inverting this because we want a
+    // positive value when we pull to the left (remember, CCW is positive in
+    // mathematics). Xbox controllers return positive values when you pull to
+    // the right by default.
+    final var rot = -modifyAxis(m_controller.getY(GenericHID.Hand.kRight)) * DrivetrainSubsystem.MaxAngularSpeedRadiansPerSecond;
+
+    m_drivetrainSubsystem.drive(new ChassisSpeeds(xSpeed, ySpeed, rot));
+  }
+
+  
+  public static double applyDeadband(double value, double deadband) {
+    if (Math.abs(value) > deadband) {
+      if (value > 0.0) {
+        return (value - deadband) / (1.0 - deadband);
+      } else {
+        return (value + deadband) / (1.0 - deadband);
+      }
+    } else {
+      return 0.0;
+    }
+  }
+
+  private static double modifyAxis(double value) {
+    // Deadband
+    value = applyDeadband(value, 0.03);
+
+    // Square the axis
+    value = Math.copySign(value * value, value);
+
+    return value;
+  }
 }

@@ -57,7 +57,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * This is a measure of how fast the robot can rotate in place.
    */
   // Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
-  public static final double MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND = MaxSpeedMetersPerSecond /
+  public static final double MaxAngularSpeedRadiansPerSecond = MaxSpeedMetersPerSecond /
           Math.hypot(DriveConstants.kTrackWidth / 2.0, DriveConstants.kWheelBase / 2.0);
 
   private final SwerveDriveOdometry m_odometry;
