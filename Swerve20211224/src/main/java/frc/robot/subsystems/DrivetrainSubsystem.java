@@ -167,6 +167,16 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+
+    var pose = m_odometry.getPoseMeters();
+
+    SmartDashboard.putNumber("X Position", pose.getTranslation().getX());
+    SmartDashboard.putNumber("Y Position", pose.getTranslation().getY());
+    SmartDashboard.putNumber("Rotation", getGyroscopeRotation().getDegrees());
+  }
+
+  public void applyDrive() {
+
     SwerveModuleState[] states = DriveConstants.kDriveKinematics.toSwerveModuleStates(m_chassisSpeeds);
     SwerveDriveKinematics.normalizeWheelSpeeds(states, MaxSpeedMetersPerSecond);
 
@@ -174,11 +184,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     m_frontRightModule.set(states[1].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[1].angle.getRadians());
     m_backLeftModule.set(states[2].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[2].angle.getRadians());
     m_backRightModule.set(states[3].speedMetersPerSecond / MaxSpeedMetersPerSecond * MAX_VOLTAGE, states[3].angle.getRadians());
- 
-    var pose = m_odometry.update(getGyroscopeRotation(), states[0], states[1], states[2], states[3]);
 
-    SmartDashboard.putNumber("X Position", pose.getTranslation().getX());
-    SmartDashboard.putNumber("Y Position", pose.getTranslation().getY());
-    SmartDashboard.putNumber("Rotation", getGyroscopeRotation().getDegrees());
+    m_odometry.update(getGyroscopeRotation(), states[0], states[1], states[2], states[3]);
   }
 }

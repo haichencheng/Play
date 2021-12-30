@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 
 import frc.robot.commands.*;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -34,6 +35,13 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    addPeriodic(
+      () -> {
+               DrivetrainSubsystem.getInstance().applyDrive();
+            }, 
+      0.005, // drive at higher frequency
+      0.000);
   }
 
   /**
