@@ -167,11 +167,10 @@ public class SwerveDriveByVoltage extends SubsystemBase {
     m_backRightModule.set(m_voltage, 0);
         
     m_odometry.update(getGyroscopeRotation(), 
-      new SwerveModuleState(m_frontLeftModule.getDriveVelocity(), new Rotation2d(0)),
-      new SwerveModuleState(m_frontRightModule.getDriveVelocity(), new Rotation2d(0)),
-      new SwerveModuleState(m_backLeftModule.getDriveVelocity(), new Rotation2d(0)),
-      new SwerveModuleState(m_backRightModule.getDriveVelocity(), new Rotation2d(0)));
-
+      new SwerveModuleState(m_frontLeftModule.getDriveVelocity(), new Rotation2d(m_frontLeftModule.getSteerAngle())),
+      new SwerveModuleState(m_frontRightModule.getDriveVelocity(), new Rotation2d(m_frontRightModule.getSteerAngle())),
+      new SwerveModuleState(m_backLeftModule.getDriveVelocity(), new Rotation2d(m_backLeftModule.getSteerAngle())),
+      new SwerveModuleState(m_backRightModule.getDriveVelocity(), new Rotation2d(m_backRightModule.getSteerAngle())));
 
     var pose = m_odometry.getPoseMeters();
     SmartDashboard.putNumber("X Position", pose.getTranslation().getX());
