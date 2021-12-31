@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 
 
 import frc.robot.commands.*;
-import frc.robot.subsystems.DrivetrainSubsystem;
+import frc.robot.subsystems.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -111,6 +111,13 @@ public class Robot extends TimedRobot {
     m_testTab.add("DriveTrain", m_robotContainer.getDriveTrainSubsystem());
     m_testTab.add("Test", "Inited");
     m_testRounds = 0;
+
+    
+    var voltageTab = Shuffleboard.getTab("VoltageTest");
+    voltageTab.add("SwerveDriveByVoltage", SwerveDriveByVoltage.getInstance());
+    voltageTab.add("Voltage", 0);
+    voltageTab.add("DurationInSec", 1);
+    voltageTab.add("VoltageTestCommand", new VoltageTestCommand());
   }
 
   /** This function is called periodically during test mode. */
