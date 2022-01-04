@@ -86,7 +86,7 @@ public class RobotContainer {
     // positive value when we pull to the left (remember, CCW is positive in
     // mathematics). Xbox controllers return positive values when you pull to
     // the right by default.
-    final var rot = -modifyAxis(m_controller.getY(GenericHID.Hand.kRight)) * DrivetrainSubsystem.MaxAngularSpeedRadiansPerSecond;
+    final var rot = -modifyAxis(m_controller.getX(GenericHID.Hand.kRight)) * DrivetrainSubsystem.MaxAngularSpeedRadiansPerSecond;
 
     m_drivetrainSubsystem.drive(new ChassisSpeeds(xSpeed, ySpeed, rot));
   }
