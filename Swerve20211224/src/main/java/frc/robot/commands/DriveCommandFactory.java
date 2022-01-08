@@ -38,7 +38,6 @@ public class DriveCommandFactory {
     return new TrajectoryDriveCommand(List.of(), new Pose2d(p_targetX, p_targetY, new Rotation2d(p_targetAngleRad)), true); 
   }
 
-
   public static Command get2019AutonomousCommandSimple() {
 
     var subsystem = DrivetrainSubsystem.getInstance();
